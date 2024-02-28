@@ -1,7 +1,6 @@
 package bank;
 
 import io.cucumber.java.en.*;
-import io.cucumber.java.sl.In;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -109,5 +108,10 @@ public class StepDefinitions {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @And("I do nothing")
+    public void iDoNothing() {
+
     }
 }
