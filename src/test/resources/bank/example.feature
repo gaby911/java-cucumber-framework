@@ -9,6 +9,7 @@ Feature: Bank Check Balance
     Then I should see $<expectedBalance> as the balance
     But there is an overdraft fee of $<fee>
     And the available balance should be $<expectedAvailableBalance>
+    @ex1
     Examples:
       | balance | deposit | expectedBalance | fee | expectedAvailableBalance |
       | 500     | 100     | 600             | 50  | 550                      |
