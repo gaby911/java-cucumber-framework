@@ -5,7 +5,7 @@ import org.junit.platform.suite.api.*;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("bank/bank.feature")
+@SelectClasspathResource("bank")
 @ConfigurationParameter(key = Constants.PLUGIN_PROPERTY_NAME, value = "pretty")
 public class RunCucumberTest {
 }

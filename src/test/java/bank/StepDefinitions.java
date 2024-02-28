@@ -1,6 +1,11 @@
 package bank;
 
 import io.cucumber.java.en.*;
+import io.cucumber.java.sl.In;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,7 +50,11 @@ public class StepDefinitions {
 
     @And("the available balance should be ${int}")
     public void theAvailableBalanceShouldBe$(int expectedAvailableBalance) {
-        availableBalance = checkingAccountBalance + depositAmount - overdraftFee + creditInterest - withdrawalAmmout;
+        if (withdrawalAmmout > 0 && withdrawalAmmout > checkingAccountBalance + depositAmount + creditInterest - overdraftFee) {
+            availableBalance = checkingAccountBalance + depositAmount - overdraftFee + creditInterest;
+        } else {
+            availableBalance = checkingAccountBalance + depositAmount - overdraftFee + creditInterest - withdrawalAmmout;
+        }
         assertEquals(expectedAvailableBalance, availableBalance);
     }
 
@@ -60,4 +69,45 @@ public class StepDefinitions {
         creditInterest = interest;
     }
 
+    @When("I request to withdraw ${int}")
+    public void iRequestToWithdraw$(int withdrawal) {
+        withdrawalAmmout = withdrawal;
+    }
+
+    @Then("I should see an Error")
+    public void iShouldSeeAnError() {
+        String errorMessage = ">> Error: Withdrawal not allowed due to insufficient funds. <<";
+        System.out.println(errorMessage);
+    }
+
+    @Given("I have the following account details from CSV file {string}")
+    public void iHaveTheFollowingAccountDetailsFromCSVFile(String csvFilePath) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(csvFilePath));
+            String line;
+            boolean firstLineSkipped = false;
+            while ((line = br.readLine()) != null) {
+                if (!firstLineSkipped) {
+                    firstLineSkipped = true;
+                    continue; //Skip the first line
+                }
+                String[] values = line.split(",");
+                int balance = Integer.parseInt(values[0].trim());
+                int deposit = Integer.parseInt(values[1].trim());
+                int expectedBalance = Integer.parseInt(values[2].trim());
+                int fee = Integer.parseInt(values[3].trim());
+                int expectedAvailableBalance = Integer.parseInt(values[4].trim());
+
+                myCheckingAccountHasABalanceOf$(balance);
+                iHaveRecentlyMadeADepositOf$(deposit);
+                iCheckMyAccountBalance();
+                iShouldSeeAsTheBalance(expectedBalance);
+                thereIsAnOverdraftFeeOf$(fee);
+                theAvailableBalanceShouldBe$(expectedAvailableBalance);
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
